@@ -15,5 +15,5 @@ Camera.p1: 0.0
 Camera.p2: 0.0
 
 # stereo baseline times f  unit:m
-Camera.b: 0.06099370081684167654981256630735
+Camera.b: 60.99370081684167654981256630735
 
