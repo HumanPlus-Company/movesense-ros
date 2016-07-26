@@ -4,7 +4,7 @@
 1. Before you build your movesense-ros package, please make sure you have installed the [movesense] libraries.
   For further information, please refer to  **./MoveSenseSDK-linux/README.md**
 
-  You can also get the source codes from the website:**https://github.com/MoveSense-HumanPlus/MoveSenseSDK-linux.git** 
+  You can also get the source codes from the website:**https://github.com/HumanPlus-Company/MoveSenseSDK-linux.git** 
 
 ## ROS
 2. Installation of [ROS] Indigo in Ubuntu
