@@ -1,0 +1,16 @@
+<package>
+  <version>1.0.0</version>
+  <description>A ROS Driver for MoveSense_Sensor</description>
+
+  <author email="Xutao@humanplus.cc">MonketTao</author>
+
+  <license>BSD</license>
+
+  <depend package="image_transport"/> 
+  <depend package="roscpp"/> 
+  <depend package="std_msgs"/> 
+  <depend package="std_srvs"/> 
+  <depend package="sensor_msgs"/> 
+  <depend package="camera_info_manager"/> 
+
+</package>

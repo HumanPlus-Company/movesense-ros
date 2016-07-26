@@ -1,0 +1,16 @@
+<package>
+  <version>1.0.0</version>
+  <description>A tool for MoveSense_Sensor</description>
+
+  <author email="xutao@humanplus.cc">XuTao</author>
+
+  <license>BSD</license>
+
+  <depend package="image_transport"/> 
+  <depend package="roscpp"/> 
+  <depend package="std_msgs"/> 
+  <depend package="std_srvs"/> 
+  <depend package="sensor_msgs"/> 
+  <depend package="cv_bridge"/> 
+
+</package>
