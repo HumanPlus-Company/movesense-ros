@@ -12,6 +12,9 @@ find_package(PkgConfig REQUIRED)
 ## movesense libraries
 find_package(MOVESENSE REQUIRED)
 
+##  PCL libraries
+find_package(PCL REQUIRED)
+
 ## YAML libraries
 pkg_check_modules(NEW_YAMLCPP yaml-cpp>=0.5)
 if(NEW_YAMLCPP_FOUND)

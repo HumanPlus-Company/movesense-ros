@@ -12,6 +12,9 @@
 #include <sensor_msgs/fill_image.h>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_types.h>
+#include <tf/transform_broadcaster.h>
 
 #ifdef HAVE_NEW_YAMLCPP
  //The >> operator disappeared in yaml-cpp 0.5, so this function is
@@ -23,6 +26,19 @@ void operator >> (const YAML::Node& node, T& i)
 }
 #endif
 
+// for pointcloud
+struct _Point
+{
+    // point
+    float x;
+    float y;
+    float z;
+    // color
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+};
+
 class MoveSenceSensorNode
 {
 public:
@@ -32,6 +48,9 @@ public:
   // shared image message
   sensor_msgs::Image img_l_, img_r_, img_d_, img_depth_;
   image_transport::CameraPublisher image_pub_l,image_pub_r,image_pub_d,image_pub_depth;
+
+  ros::Publisher point_cloud_pub_;
+  tf::TransformBroadcaster tf_broadcaster_;
 
   boost::shared_ptr<camera_info_manager::CameraInfoManager> cinfo_;
 
@@ -57,6 +76,8 @@ public:
   float c_k1, c_k2, c_p1, c_p2;
   float c_f, c_cu, c_cv, c_b;
 
+  typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud;
+
   MoveSenceSensorNode() :
       node_("~"),
       cam_(NULL),
@@ -69,9 +90,10 @@ public:
     // advertise the main image topic
     image_transport::ImageTransport it(node_);
     image_pub_l = it.advertiseCamera("left/image_raw", 1);
-    image_pub_r = it.advertiseCamera("right/image_raw", 2);
-    image_pub_d = it.advertiseCamera("disp/image_raw", 3);
-    image_pub_depth = it.advertiseCamera("depth/image_raw", 4);
+    image_pub_r = it.advertiseCamera("right/image_raw", 1);
+    image_pub_d = it.advertiseCamera("disp/image_raw", 1);
+    image_pub_depth = it.advertiseCamera("depth/image_raw", 1);
+    point_cloud_pub_ = node_.advertise<PointCloud>("depth/point_cloud", 1);
 
 
     // grab the parameters
@@ -304,21 +326,61 @@ public:
 			memcpy(img_d+width*i,	img_data+(3*i+2)*width,	width);
 		  }
 
+          // _Point vector
+         std::vector<_Point> ms_point;
+
           // change disp to depth
           for(int i = 0 ; i < height; i++)
           {
               for(int j = 0; j<width; j++)
               {
                   if (img_d[i*width + j] >128)  {
-                      if (2*img_d[i*width + j] - 128 == 0) img_depth[i*width + j] = 0;
-                      else img_depth[i*width + j]  = 4.0 * c_f * c_b / (2*img_d[i*width + j] - 128);
+                      if (2*img_d[i*width + j] - 128 < 1e-6) img_depth[i*width + j] = 0;
+                      else {
+                          img_depth[i*width + j]  = 4.0 * c_f * c_b / (2*img_d[i*width + j] - 128);
+                          _Point p;
+                          p.x = (j - c_cu)*(img_depth[i*width + j]/c_f);
+                          p.y = (i - c_cv)*(img_depth[i*width + j]/c_f);
+                          p.z = img_depth[i*width + j];
+
+                          p.r = p.g = p.b = img_l[i*width + j];
+                          ms_point.push_back(p);
+                      }
                   }
                   else {
-                      if (img_d[i*width + j] == 0) img_depth[i*width + j] = 0;
-                      else img_depth[i*width + j]  =4.0 *  c_f * c_b / img_d[i*width + j] ;
+                      if (img_d[i*width + j]  < 1e-6) img_depth[i*width + j] = 0;
+                      else {
+                          img_depth[i*width + j]  =4.0 *  c_f * c_b / img_d[i*width + j] ;
+                          _Point p;
+                          p.x = (j - c_cu)*(img_depth[i*width + j]/c_f);
+                          p.y = (i - c_cv)*(img_depth[i*width + j]/c_f);
+                          p.z = img_depth[i*width + j];
+
+                          p.r = p.g = p.b = img_l[i*width + j];
+                          ms_point.push_back(p);
+                      }
                   }
               }
           }
+
+          // compute pintcloud
+          PointCloud::Ptr point_cloud(new PointCloud());
+          point_cloud->header.frame_id = std::string("base_link");
+          point_cloud->header.stamp = pcl_conversions::toPCL(ci_l->header).stamp;
+          point_cloud->width = 1;
+          point_cloud->height = ms_point.size();
+          point_cloud->points.resize(ms_point.size());
+
+          for (int i = 0; i < ms_point.size(); ++i)
+          {
+            point_cloud->points[i].x = ms_point[i].x;
+            point_cloud->points[i].y = ms_point[i].y;
+            point_cloud->points[i].z = ms_point[i].z;
+
+            point_cloud->points[i].r = ms_point[i].r;
+            point_cloud->points[i].g = ms_point[i].g;
+            point_cloud->points[i].b = ms_point[i].b;
+        }
 
 		  fillImage(img_l_, "mono8", height, width, width, img_l);
 		  fillImage(img_r_, "mono8", height, width, width, img_r);
@@ -335,6 +397,7 @@ public:
           image_pub_d.publish(img_d_,*ci_d);
 		  image_pub_d.publish(img_depth_,*ci_d);
 
+          point_cloud_pub_.publish(point_cloud);
       }
       
       ros::spinOnce();
@@ -377,7 +440,8 @@ int main(int argc, char **argv)
              "\t/movesense_sensor/disp/image_raw\n"
              "\t/movesense_sensor/disp/camera_info\n"
              "\t/movesense_sensor/depth/image_raw\n"
-             "\t/movesense_sensor/depth/camera_info\n");
+             "\t/movesense_sensor/depth/camera_info\n"
+             "\t/movesense_sensor/depth/point_cloud\n");
   }
 
   MoveSenceSensorNode a;

@@ -65,7 +65,7 @@ public:
     // advertise the main image topic
     image_transport::ImageTransport it(node_);
     image_pub_l = it.advertiseCamera("left/image_raw", 1);
-    image_pub_r = it.advertiseCamera("right/image_raw", 2);
+    image_pub_r = it.advertiseCamera("right/image_raw", 1);
 
     // grab the parameters
     node_.param("camera_mode", camera_mode, std::string("CAM_STEREO_752X480_LR_30FPS"));

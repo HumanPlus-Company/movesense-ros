@@ -11,6 +11,7 @@
   <depend package="std_msgs"/> 
   <depend package="std_srvs"/> 
   <depend package="sensor_msgs"/> 
+  <depend package="pcl_ros"/>
   <depend package="camera_info_manager"/> 
 
 </package>
