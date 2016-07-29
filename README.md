@@ -49,7 +49,7 @@
 
 		$ rosrun rviz rviz
 
-  You can see the **point cloud** by launching **movesense-ros_LD_node**, then in Rviz, click on **add** (bottom left), select the **By Topic** tab, select **movesense_sensor->depth->point_cloud->PointCloud2** and click **OK**. Don't forget change **Global Options->Fixed Frame** to **base_link**.
+  You can see the **point cloud** by launching **movesense-ros_LD_node**, then in Rviz, click on **add** (bottom left), select the **By Topic** tab, select **movesense_sensor->depth->point_cloud->PointCloud2** and click **OK**. Don't forget change **Global Options->Fixed Frame** to **camera_link**.
   
   Because of movesense point cloud data is measured in millimeters(**mm**), you should change **PointCloud2->Size(m)** to **10** or more.
 

@@ -94,7 +94,7 @@ public:
     point_cloud_pub_ = node_.advertise<PointCloud>("depth/point_cloud", 1);
 
     // grab the parameters
-    node_.param("camera_mode", camera_mode, std::string("CAM_STEREO_752X480_LD_30FPS"));
+    node_.param("camera_mode", camera_mode, std::string("CAM_STEREO_376X240_LD_30FPS"));
     node_.param("camera_param",camera_param,std::string("./config"));
     node_.param("camera_name", camera_name_, std::string("movesence_sensor"));
     node_.param("camera_info_url", camera_info_url_, std::string(""));
@@ -202,6 +202,10 @@ public:
         height = 240;
         len = width*height*2;
         sel = CAM_STEREO_376X240_LD_30FPS;
+        // fix camera param
+        c_cu /= 2.0;
+        c_cv /= 2.0;
+        c_f /= 2.0;
     }
     else
     {
@@ -308,7 +312,6 @@ public:
           ci_l->header.stamp = stamp;
           ci_d->header.stamp = stamp;
 
-
           for(int i = 0 ; i < height; i++)
           {
               memcpy(img_l+width*i,	img_data+(2*i)*width, width);
@@ -328,8 +331,8 @@ public:
                       else {
                           img_depth[i*width + j]  = 4.0 * c_f * c_b / (2*img_d[i*width + j] - 128);
                           _Point p;
-                          p.x = (j - c_cu)*(img_depth[i*width + j]/c_f);
-                          p.y = (i - c_cv)*(img_depth[i*width + j]/c_f);
+                          p.x = (j - c_cu)*(img_depth[i*width + j]/ c_f);
+                          p.y = (i - c_cv)*(img_depth[i*width + j]/ c_f);
                           p.z = img_depth[i*width + j];
 
                           p.r = p.g = p.b = img_l[i*width + j];
@@ -339,10 +342,10 @@ public:
                   else {
                       if (img_d[i*width + j]  < 1e-6) img_depth[i*width + j] = 0;
                       else {
-                          img_depth[i*width + j]  =4.0 *  c_f * c_b / img_d[i*width + j] ;
+                          img_depth[i*width + j]  =4.0 * c_f * c_b / img_d[i*width + j] ;
                           _Point p;
-                          p.x = (j - c_cu)*(img_depth[i*width + j]/c_f);
-                          p.y = (i - c_cv)*(img_depth[i*width + j]/c_f);
+                          p.x = (j - c_cu)*(img_depth[i*width + j]/ c_f);
+                          p.y = (i - c_cv)*(img_depth[i*width + j]/ c_f);
                           p.z = img_depth[i*width + j];
 
                           p.r = p.g = p.b = img_l[i*width + j];
@@ -354,7 +357,7 @@ public:
 
           // compute pintcloud
           PointCloud::Ptr point_cloud(new PointCloud());
-          point_cloud->header.frame_id = std::string("base_link");
+          point_cloud->header.frame_id = std::string("camera_link");
           point_cloud->header.stamp = pcl_conversions::toPCL(ci_l->header).stamp;
           point_cloud->width = 1;
           point_cloud->height = ms_point.size();

@@ -5,9 +5,9 @@
 #--------------------------------------------------------------------------------------------
 
 # Camera calibration and distortion parameters (OpenCV) 
-Camera.f: 5.9899966570909692e+002
-Camera.cu: 4.6145029449462891e+002
-Camera.cv: 2.1999653625488281e+002
+Camera.f: 5.9304624716409694e+002
+Camera.cu: 4.4587964248657227e+002
+Camera.cv: 2.6209262847900391e+002
 
 Camera.k1: 0.0
 Camera.k2: 0.0
@@ -15,5 +15,5 @@ Camera.p1: 0.0
 Camera.p2: 0.0
 
 # stereo baseline times f  unit:mm
-Camera.b: 60.99370081684167654981256630735
+Camera.b: 59.5888553
 

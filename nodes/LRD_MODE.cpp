@@ -208,6 +208,10 @@ public:
       	height = 240;
       	len = width*height*2;
 		sel = CAM_STEREO_376X240_LRD_30FPS;
+        // fix camera param
+        c_cu /= 2.0;
+        c_cv /= 2.0;
+        c_f /= 2.0;
     }
     else
     {
