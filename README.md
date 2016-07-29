@@ -67,7 +67,7 @@
              
   Change the default param of movesense-ros:
 
-		$ rosrun movesense-ros movesense-ros_LR_node mode:=CAM_STEREO_752X480_LR_30FPS param:=./config.
+		$ rosrun movesense-ros movesense-ros_LR_node mode:=CAM_STEREO_752X480_LR_30FPS param:=/config
 
   You can use the following keywords to change the sensor work mode:
   
